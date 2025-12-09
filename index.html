@@ -1,55 +1,73 @@
 <!DOCTYPE html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="src/style.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/axios@1.6.7/dist/axios.min.js"></script>
+    <title>Ezezulu</title>
+  </head>
 
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="src/style.css" />
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap"
-    rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/axios@1.6.7/dist/axios.min.js"></script>
-  <title>Ezezulu</title>
-</head>
-<body>
+  <body>
     <div class="weather-app">
-    <header>
-      <form class = "search-form" id="search-form">
-        <input type = "search" placeholder="Enter a city.." required id="search-form-input" class="search-form-input" />
-        <input type ="submit" value="Search" class="search-form-button" />
-      </form>
-    </header>
-    <main>
-      <div class="weather-app-data">
-        <div>
-          <h1 class="weather-app-city" id="city"></h1>
-          <p class="weather-app-details">
-            <span id="time"></span>
-            <span id="description"></span>
-            <br />
-            Humidity: <strong id="humidity"></strong>, wind: 
-            <strong id="wind-speed"></strong>
-          </p>
-        </div>
-        <div class="weather-app-temperature-container">
-          <div id="icon">
-          <img src="http://shecodes-assets.s3.amazonaws.com/api/weather/icons/rain-day.png"
-          class="weather-app-icon"/>
+      <header>
+        <form class="search-form" id="search-form">
+          <input
+            id="search-form-input"
+            class="search-form-input"
+            type="search"
+            placeholder="Enter a city.."
+            required
+          />
+          <input class="search-form-button" type="submit" value="Search" />
+        </form>
+      </header>
+
+      <main>
+        <div class="weather-app-data">
+          <div>
+            <h1 class="weather-app-city" id="city"></h1>
+            <p class="weather-app-details">
+              <span id="time"></span>
+              <span id="description"></span>
+              <br />
+              Humidity: <strong id="humidity"></strong>, wind:
+              <strong id="wind-speed"></strong>
+            </p>
           </div>
-          <div class="weather-app-temperature" id="temperature"></div>
-          <div class="weather-app-unit">°C</div>
+
+          <div class="weather-app-temperature-container">
+            <div id="icon">
+              <img
+                class="weather-app-icon"
+                src="http://shecodes-assets.s3.amazonaws.com/api/weather/icons/rain-day.png"
+                alt="weather icon"
+              />
+            </div>
+            <div class="weather-app-temperature" id="temperature"></div>
+            <div class="weather-app-unit">°C</div>
+          </div>
         </div>
-      </div>
-    </main>
 
-    <footer>Coded by
-      <a href="https://github.com/PrudenceMasango" target="_blank">Prudence Masango</a> and is on <a
-        href="https://github.com/PrudenceMasango/PruDev" target="_blank">GitHub</a> and hosted on <a
-        href="https://prudev-app.netlify.app/" target="_blank">Netlify</a>
-    </footer>
-  </div>
-  <script src="src/index.js"></script>
-</body>
+        <div class="weather-forecast" id="forecast"></div>
+      </main>
 
+      <footer>
+        Coded by
+        <a href="https://github.com/PrudenceMasango" target="_blank">Prudence Masango</a>
+        and is on
+        <a href="https://github.com/PrudenceMasango/PruDev" target="_blank">GitHub</a>
+        and hosted on
+        <a href="https://prudev-app.netlify.app/" target="_blank">Netlify</a>
+      </footer>
+    </div>
+
+    <script src="src/index.js"></script>
+  </body>
 </html>
