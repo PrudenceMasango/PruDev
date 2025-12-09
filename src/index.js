@@ -11,14 +11,11 @@ function refreshWeather(response) {
   const timeElement = document.querySelector("#time");
   const iconElement = document.querySelector("#icon");
 
-  // Temperature: try common shapes (data.temperature.current or data.temperature)
   const temp = data.temperature && (typeof data.temperature.current !== 'undefined' ? data.temperature.current : data.temperature);
   if (temperatureElement) temperatureElement.innerText = (typeof temp !== 'undefined' && temp !== null) ? Math.round(temp) : 'N/A';
 
-  // City
   if (cityElement) cityElement.innerText = data.city || '';
 
-  // Time
   if (timeElement) {
     if (data.time) {
       const date = new Date(data.time * 1000);
@@ -28,25 +25,21 @@ function refreshWeather(response) {
     }
   }
 
-  // Description
   const description = (data.condition && (data.condition.description || data.condition)) || data.description || '';
   if (descriptionElement) descriptionElement.innerText = description;
 
-  // Humidity
   const humidity = (data.temperature && data.temperature.humidity) || data.humidity || null;
   if (humidityElement) humidityElement.innerText = humidity !== null && typeof humidity !== 'undefined' ? `${humidity}%` : '-';
 
-  // Wind
   const windSpeed = (data.wind && (data.wind.speed || data.wind)) || data.wind_speed || null;
   if (windSpeedElement) windSpeedElement.innerText = windSpeed !== null && typeof windSpeed !== 'undefined' ? `${windSpeed} km/h` : '-';
 
-  // Icon: prefer API-provided absolute URL, otherwise try to construct SheCodes asset URL, otherwise emoji
   if (iconElement) {
     const iconUrl = (data.condition && (data.condition.icon_url || data.condition.icon)) || data.icon_url || null;
     if (iconUrl && typeof iconUrl === 'string') {
       let src = iconUrl;
       if (!/^https?:\/\//i.test(src)) {
-        // If API returned just a filename like "rain-day.png" or "rain-day", attempt to normalize
+      
         src = src.startsWith('/') ? src : `http://shecodes-assets.s3.amazonaws.com/api/weather/icons/${src}`;
       }
       iconElement.innerHTML = `<img src="${src}" class="weather-app-icon" alt="weather icon"/>`;
