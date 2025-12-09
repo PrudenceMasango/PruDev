@@ -1,10 +1,118 @@
-function handleSearchSubmit(event) {
-    event.preventDefault();
-    let searchInput = document.querySelector("#search-form-input");
-    console.log(searchInput.value);
-    let cityElement = document.querySelector("#city");
-    cityElement.innerHTML = searchInput.value;
+// Responsible for displaying current weather (no forecast)
+function refreshWeather(response) {
+  console.log("API response:", response);
+  const data = response && response.data ? response.data : {};
+
+  const temperatureElement = document.querySelector("#temperature");
+  const cityElement = document.querySelector("#city");
+  const descriptionElement = document.querySelector("#description");
+  const humidityElement = document.querySelector("#humidity");
+  const windSpeedElement = document.querySelector("#wind-speed");
+  const timeElement = document.querySelector("#time");
+  const iconElement = document.querySelector("#icon");
+
+  // Temperature: try common shapes (data.temperature.current or data.temperature)
+  const temp = data.temperature && (typeof data.temperature.current !== 'undefined' ? data.temperature.current : data.temperature);
+  if (temperatureElement) temperatureElement.innerText = (typeof temp !== 'undefined' && temp !== null) ? Math.round(temp) : 'N/A';
+
+  // City
+  if (cityElement) cityElement.innerText = data.city || '';
+
+  // Time
+  if (timeElement) {
+    if (data.time) {
+      const date = new Date(data.time * 1000);
+      timeElement.innerText = formatDate(date);
+    } else {
+      timeElement.innerText = '';
+    }
+  }
+
+  // Description
+  const description = (data.condition && (data.condition.description || data.condition)) || data.description || '';
+  if (descriptionElement) descriptionElement.innerText = description;
+
+  // Humidity
+  const humidity = (data.temperature && data.temperature.humidity) || data.humidity || null;
+  if (humidityElement) humidityElement.innerText = humidity !== null && typeof humidity !== 'undefined' ? `${humidity}%` : '-';
+
+  // Wind
+  const windSpeed = (data.wind && (data.wind.speed || data.wind)) || data.wind_speed || null;
+  if (windSpeedElement) windSpeedElement.innerText = windSpeed !== null && typeof windSpeed !== 'undefined' ? `${windSpeed} km/h` : '-';
+
+  // Icon: prefer API-provided absolute URL, otherwise try to construct SheCodes asset URL, otherwise emoji
+  if (iconElement) {
+    const iconUrl = (data.condition && (data.condition.icon_url || data.condition.icon)) || data.icon_url || null;
+    if (iconUrl && typeof iconUrl === 'string') {
+      let src = iconUrl;
+      if (!/^https?:\/\//i.test(src)) {
+        // If API returned just a filename like "rain-day.png" or "rain-day", attempt to normalize
+        src = src.startsWith('/') ? src : `http://shecodes-assets.s3.amazonaws.com/api/weather/icons/${src}`;
+      }
+      iconElement.innerHTML = `<img src="${src}" class="weather-app-icon" alt="weather icon"/>`;
+    } else {
+      iconElement.innerText = getEmojiForDescription(description);
+    }
+  }
 }
 
-let searchForm = document.querySelector("#search-form");
-searchForm.addEventListener("submit", handleSearchSubmit);
+function formatDate(date) {
+  let minutes = date.getMinutes();
+  let hours = date.getHours();
+  const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+  const day = days[date.getDay()];
+  if (minutes < 10) minutes = `0${minutes}`;
+  return `${day} ${hours}:${minutes}`;
+}
+
+function getEmojiForDescription(desc) {
+  if (!desc) return '🌤️';
+  const s = desc.toLowerCase();
+  if (s.includes('clear') || s.includes('sun')) return '☀️';
+  if (s.includes('cloud')) return '☁️';
+  if (s.includes('rain') || s.includes('drizzle')) return '🌧️';
+  if (s.includes('snow')) return '❄️';
+  if (s.includes('thunder') || s.includes('storm')) return '⛈️';
+  if (s.includes('mist') || s.includes('fog') || s.includes('haze')) return '🌫️';
+  return '🌤️';
+}
+
+function searchCity(city) {
+  if (!city || !city.toString().trim()) {
+    alert('Please enter a city name.');
+    return;
+  }
+  const q = encodeURIComponent(city.toString().trim());
+  const apiKey = '0504o4893c18ff9e4aa1abac210t3155';
+  const apiUrl = `https://api.shecodes.io/weather/v1/current?query=${q}&key=${apiKey}&units=metric`;
+  console.log('Requesting', apiUrl);
+  const temperatureElement = document.querySelector('#temperature');
+  if (temperatureElement) temperatureElement.innerText = 'Loading...';
+
+  axios
+    .get(apiUrl)
+    .then((response) => refreshWeather(response))
+    .catch((err) => {
+      console.error('API Error:', err);
+      if (err.response) {
+        alert(`Could not fetch weather for "${city}" (server returned ${err.response.status}).`);
+      } else if (err.request) {
+        alert(`No response from weather API for "${city}". Check network/CORS.`);
+      } else {
+        alert(`Request error: ${err.message}`);
+      }
+      if (temperatureElement) temperatureElement.innerText = '-';
+    });
+}
+
+function handleSearchSubmit(event) {
+  event.preventDefault();
+  const searchInput = document.querySelector('#search-form-input');
+  if (searchInput) searchCity(searchInput.value);
+}
+
+const searchFormElement = document.querySelector('#search-form');
+if (searchFormElement) searchFormElement.addEventListener('submit', handleSearchSubmit);
+
+// initial load
+searchCity('Paris');
