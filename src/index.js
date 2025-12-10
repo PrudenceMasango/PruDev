@@ -1,4 +1,3 @@
-// Responsible for displaying current weather (no forecast)
 function refreshWeather(response) {
   console.log("API response:", response);
   const data = response && response.data ? response.data : {};
@@ -84,7 +83,11 @@ function searchCity(city) {
 
   axios
     .get(apiUrl)
-    .then((response) => refreshWeather(response))
+    .then((response) => {
+      refreshWeather(response);
+      // Fetch forecast for the same city
+      getForecast(q);
+    })
     .catch((err) => {
       console.error('API Error:', err);
       if (err.response) {
@@ -104,26 +107,54 @@ function handleSearchSubmit(event) {
   if (searchInput) searchCity(searchInput.value);
 }
 
-function displayForecast() {
+function getForecast(city) {
+  const apiKey = '0504o4893c18ff9e4aa1abac210t3155';
+  const apiUrl = `https://api.shecodes.io/weather/v1/forecast?query=${city}&key=${apiKey}&units=metric`;
+  console.log('Fetching forecast:', apiUrl);
+  axios
+    .get(apiUrl)
+    .then((response) => displayForecast(response))
+    .catch((err) => {
+      console.error('Forecast API Error:', err);
+    });
+}
+
+function formatDay(timestamp) {
+  const date = new Date(timestamp * 1000);
   const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  return days[date.getDay()];
+}
+
+function displayForecast(response) {
+  console.log('Forecast response:', response.data);
   let forecastHtml = '';
 
-  days.forEach(function(day) {
-    forecastHtml += `
-      <div class="weather-forecast-day">
-        <div class="weather-forecast-date">${day}</div>
-        <div class="weather-forecast-icon">🌤️</div>
-        <div class="weather-forecast-temperatures">
-          <div class="weather-forecast-temperature"><strong>15°</strong></div>
-          <div class="weather-forecast-temperature">9°</div>
-        </div>
-      </div>
-    `;
-  });
+  if (response.data && response.data.daily && Array.isArray(response.data.daily)) {
+    response.data.daily.forEach(function(day, index) {
+      if (index < 5) {
+        const iconUrl = day.condition && day.condition.icon_url ? day.condition.icon_url : '';
+        const maxTemp = day.temperature && typeof day.temperature.maximum !== 'undefined' ? Math.round(day.temperature.maximum) : '-';
+        const minTemp = day.temperature && typeof day.temperature.minimum !== 'undefined' ? Math.round(day.temperature.minimum) : '-';
+
+        forecastHtml += `
+          <div class="weather-forecast-day">
+            <div class="weather-forecast-date">${formatDay(day.time)}</div>
+            <div class="weather-forecast-icon-wrapper">
+              ${iconUrl ? `<img src="${iconUrl}" class="weather-forecast-icon" alt="weather" />` : '🌤️'}
+            </div>
+            <div class="weather-forecast-temperatures">
+              <div class="weather-forecast-temperature"><strong>${maxTemp}°</strong></div>
+              <div class="weather-forecast-temperature">${minTemp}°</div>
+            </div>
+          </div>
+        `;
+      }
+    });
+  }
 
   const forecastElement = document.querySelector('.weather-forecast');
   if (forecastElement) {
-    forecastElement.innerHTML = forecastHtml;
+    forecastElement.innerHTML = forecastHtml || '<p>No forecast data available</p>';
   }
 }
 
@@ -131,6 +162,6 @@ const searchFormElement = document.querySelector('#search-form');
 if (searchFormElement) searchFormElement.addEventListener('submit', handleSearchSubmit);
 
 searchCity('Paris');
-displayForecast();
+getForecast('Paris');
 
 
